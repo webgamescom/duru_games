@@ -145,14 +145,13 @@ if (document.getElementById('cringe-oyunu')) {
    FLAPPY BIRD OYUNU MANTIĞI
    ============================ */
 
-// Sadece 'flappy-board' ID'si olan sayfada çalışması için kontrol
 if (document.getElementById('flappy-board')) {
     
     // Oyun Alanı Ayarları
     const board = document.getElementById('flappy-board');
-    const boardWidth = 360; // Genişlik
-    const boardHeight = 640; // Yükseklik
-    const context = board.getContext("2d"); // Oyunun çizileceği alan
+    const boardWidth = 360;
+    const boardHeight = 640;
+    const context = board.getContext("2d");
 
     board.height = boardHeight;
     board.width = boardWidth;
@@ -171,7 +170,7 @@ if (document.getElementById('flappy-board')) {
         height: characterHeight
     }
 
-    // Duvar (Boru) Ayarları
+    // Duvar (Boru) Resim Ayarları
     let pipeArray = [];
     const pipeWidth = 64; 
     const pipeHeight = 512;
@@ -181,22 +180,34 @@ if (document.getElementById('flappy-board')) {
     let topPipeImg;
     let bottomPipeImg;
 
-    // Fizik Ayarları
-    let velocityX = -2; // Duvarların sola hareket hızı
-    let velocityY = 0; // Karakterin zıplama hızı
-    let gravity = 0.1; // Yerçekimi
+    // =================================================================
+    // YENİ: AYARLANABİLİR HITBOX DEĞİŞKENLERİ
+    // Resimlerine göre bu değerleri değiştirerek hitbox'ları ayarlayabilirsin.
+    // =================================================================
+    const HITBOX_OFFSET_X = 20;      // Hitbox'ın, duvar resminin sol kenarından ne kadar içeride başlayacağı.
+    const HITBOX_WIDTH = 28;        // Hitbox'ın genişliği.
+    
+    // ÜST DUVAR İÇİN:
+    const TOP_PIPE_HITBOX_OFFSET_Y = 0;  // Hitbox'ın, üst duvar resminin üst kenarından ne kadar aşağıda başlayacağı.
+    const TOP_PIPE_HITBOX_HEIGHT = 500;  // Üst duvar hitbox'ının yüksekliği.
+    
+    // ALT DUVAR İÇİN:
+    const BOTTOM_PIPE_HITBOX_OFFSET_Y = 10; // Hitbox'ın, alt duvar resminin üst kenarından ne kadar aşağıda başlayacağı.
+    const BOTTOM_PIPE_HITBOX_HEIGHT = 500;  // Alt duvar hitbox'ının yüksekliği.
+    // =================================================================
 
+    // Fizik Ayarları
+    let velocityX = -2;
+    let velocityY = 0;
+    let gravity = 0.1;
+    
     let gameOver = false;
     let score = 0;
 
-    // Oyun kurulumu
     window.onload = function() {
-        // Resimleri yükle
         characterImg = new Image();
         characterImg.src = "images/ucan-karakter.png";
-        characterImg.onload = function() {
-            context.drawImage(characterImg, character.x, character.y, character.width, character.height);
-        }
+        characterImg.onload = () => context.drawImage(characterImg, character.x, character.y, character.width, character.height);
 
         topPipeImg = new Image();
         topPipeImg.src = "images/duvar1.png";
@@ -204,54 +215,52 @@ if (document.getElementById('flappy-board')) {
         bottomPipeImg = new Image();
         bottomPipeImg.src = "images/duvar2.png";
 
-        requestAnimationFrame(update); // Oyun döngüsünü başlat
-        setInterval(placePipes, 1500); // 1.5 saniyede bir yeni duvar ekle
-        document.addEventListener("keydown", moveCharacter); // Klavyeden tuşa basınca
-        board.addEventListener("mousedown", moveCharacter); // Mouse ile tıklayınca
+        requestAnimationFrame(update);
+        setInterval(placePipes, 1500);
+        document.addEventListener("keydown", moveCharacter);
+        board.addEventListener("mousedown", moveCharacter);
     }
 
-    // Oyun döngüsü
     function update() {
         requestAnimationFrame(update);
-        if (gameOver) {
-            return;
-        }
+        if (gameOver) return;
         context.clearRect(0, 0, board.width, board.height);
 
-        // Karakteri güncelle
         velocityY += gravity;
-        character.y = Math.max(character.y + velocityY, 0); // Karakter üst sınırdan çıkamaz
+        character.y = Math.max(character.y + velocityY, 0);
         context.drawImage(characterImg, character.x, character.y, character.width, character.height);
 
-        // Karakter yere çarparsa oyunu bitir
         if (character.y > board.height) {
             gameOver = true;
         }
 
-        // Duvarları güncelle
         for (let i = 0; i < pipeArray.length; i++) {
             let pipe = pipeArray[i];
             pipe.x += velocityX;
             context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
 
-            // Skoru artır
+            // YENİ: Hitbox'ın pozisyonunu resimle birlikte güncelle
+            pipe.hitbox.x = pipe.x + HITBOX_OFFSET_X;
+            
+            // YENİ: GÖRÜNÜR HITBOX'I ÇİZ (Ayarlama için)
+            context.fillStyle = "rgba(255, 0, 0, 0.5)"; // Yarı saydam kırmızı
+            //context.fillRect(pipe.hitbox.x, pipe.hitbox.y, pipe.hitbox.width, pipe.hitbox.height);
+
             if (!pipe.passed && character.x > pipe.x + pipe.width) {
-                score += 0.5; // İki duvar olduğu için 0.5
+                score += 0.5;
                 pipe.passed = true;
             }
 
-            // Çarpışma kontrolü
-            if (detectCollision(character, pipe)) {
+            // DEĞİŞTİRİLDİ: Çarpışmayı artık resimle değil, hitbox ile kontrol et
+            if (detectCollision(character, pipe.hitbox)) {
                 gameOver = true;
             }
         }
 
-        // Geçmiş duvarları temizle
         while (pipeArray.length > 0 && pipeArray[0].x < -pipeWidth) {
             pipeArray.shift();
         }
 
-        // Skoru ekrana yazdır
         context.fillStyle = "white";
         context.font = "45px sans-serif";
         context.fillText(score, 5, 45);
@@ -263,11 +272,8 @@ if (document.getElementById('flappy-board')) {
         }
     }
     
-    // Yeni duvarları yerleştir
     function placePipes() {
-        if (gameOver) {
-            return;
-        }
+        if (gameOver) return;
 
         let randomPipeY = pipeY - pipeHeight / 4 - Math.random() * (pipeHeight / 2);
         let openingSpace = board.height / 4;
@@ -278,7 +284,14 @@ if (document.getElementById('flappy-board')) {
             y: randomPipeY,
             width: pipeWidth,
             height: pipeHeight,
-            passed: false
+            passed: false,
+            // YENİ: Üst duvar için hitbox oluştur
+            hitbox: {
+                x: pipeX + HITBOX_OFFSET_X,
+                y: randomPipeY + TOP_PIPE_HITBOX_OFFSET_Y,
+                width: HITBOX_WIDTH,
+                height: TOP_PIPE_HITBOX_HEIGHT
+            }
         }
         pipeArray.push(topPipe);
 
@@ -288,17 +301,21 @@ if (document.getElementById('flappy-board')) {
             y: randomPipeY + pipeHeight + openingSpace,
             width: pipeWidth,
             height: pipeHeight,
-            passed: false
+            passed: false,
+            // YENİ: Alt duvar için hitbox oluştur
+            hitbox: {
+                x: pipeX + HITBOX_OFFSET_X,
+                y: randomPipeY + pipeHeight + openingSpace + BOTTOM_PIPE_HITBOX_OFFSET_Y,
+                width: HITBOX_WIDTH,
+                height: BOTTOM_PIPE_HITBOX_HEIGHT
+            }
         }
         pipeArray.push(bottomPipe);
     }
     
-    // Karakteri zıplat
     function moveCharacter(e) {
         if (e.code == "Space" || e.type === "mousedown") {
-            velocityY = -4; // Zıplama gücü
-
-            // Oyun bittiyse yeniden başlat
+            velocityY = -4;
             if (gameOver) {
                 character.y = characterY;
                 pipeArray = [];
@@ -308,7 +325,7 @@ if (document.getElementById('flappy-board')) {
         }
     }
 
-    // Çarpışma kontrolü
+    // Bu fonksiyon değişmedi, çünkü artık doğrudan hitbox'ı kontrol ediyor.
     function detectCollision(a, b) {
         return a.x < b.x + b.width &&
                a.x + a.width > b.x &&
