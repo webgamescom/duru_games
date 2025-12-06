@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>En Cringe Duru'yu Seç!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Ana sayfaya geri dönme butonu -->
+    <a href="anasayfa.html" class="geri-butonu">&larr; Ana Sayfaya Dön</a>
+
+    <div class="oyun-sayfasi-container">
+        <!-- OYUN 1: EN CRINGE DURU'YU SEÇ -->
+        <section id="cringe-oyunu">
+            <!-- Oyunun ana görseli (4:3 oranında) -->
+            <div class="oyun-banner">
+                <img src="images/oyun-banner.jpg" alt="En Cringe Duru'yu Seç Oyunu">
+            </div>
+            <h2>En Cringe Duru'yu Seç!</h2>
+            
+            <!-- Resimlerin karşılaştırılacağı alan -->
+            <div id="oyun-alani">
+                <div class="secim-konteyner" id="sol-resim-konteyner">
+                    <img src="" alt="Seçim 1" class="secim-resmi" onclick="kazananSec('sol')">
+                </div>
+                
+                <div class="vs-text">VS</div>
+
+                <div class="secim-konteyner" id="sag-resim-konteyner">
+                    <img src="" alt="Seçim 2" class="secim-resmi" onclick="kazananSec('sag')">
+                </div>
+            </div>
+
+            <!-- Oyun bittiğinde gösterilecek sonuç alanı (başta gizli) -->
+            <div id="sonuc-alani" class="hidden">
+                <h2 id="kazanan-resim-baslik">Veee En Cringe Fotoğraf!</h2>
+                <div id="kazanan-resim"></div>
+                <h3>İşte Tam Cringe'lik Sıralaması:</h3>
+                <ol id="cringe-siralamasi"></ol>
+            </div>
+        </section>
+    </div>
+
+    <!-- JavaScript dosyamızı en sona ekliyoruz -->
+    <script src="script.js"></script>
+</body>
+</html>

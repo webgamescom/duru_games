@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap!</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- Başlangıçta görünecek sıkılmış fotoğraf -->
+        <img src="images/sıkılmıs.jpg" alt="Sıkılmış Arkadaş" id="sıkılmıs-foto" class="arkadas-foto">
+        
+        <!-- Parola doğru girilince görünecek sevinmiş fotoğraf (başta gizli) -->
+        <img src="images/sevinmis.jpg" alt="Sevinmiş Arkadaş" id="sevinmis-foto" class="arkadas-foto hidden">
+
+        <!-- Başlangıçta görünecek parola isteme bölümü -->
+        <div id="parola-bolumu">
+            <h2>Parolayı söyle! 🙄</h2>
+            <div class="parola-input-alani">
+                <label for="parola">15 + 8 = ?</label>
+                <input type="number" id="parola-input" placeholder="Sonucu gir">
+                <button onclick="parolaKontrol()">Giriş Yap</button>
+            </div>
+        </div>
+
+        <!-- Parola doğru olunca görünecek bölüm (başta gizli) -->
+        <div id="basari-mesaji" class="hidden">
+            <h2>Yaşasın! Hadi başlayalım! 🎉</h2>
+            <a href="anasayfa.html" class="devam-butonu">Devam Et</a>
+        </div>
+    </div>
+
+    <!-- JavaScript dosyamızı en sona ekliyoruz -->
+    <script src="script.js"></script>
+
+</body>
+</html>
