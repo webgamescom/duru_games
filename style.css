@@ -283,6 +283,30 @@ button:hover, .devam-butonu:hover {
     object-fit: cover;
 }
 
+
+/* ============================
+   FLAPPY BIRD OYUN STİLLERİ
+   ============================ */
+
+.flappy-oyun-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 50px;
+}
+
+.flappy-oyun-container h1 {
+    color: #333;
+}
+
+#flappy-board {
+    background-color: #70c5ce; /* Klasik gökyüzü mavisi */
+    border: 3px solid #333;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
 /* ============================
    MOBİL CİHAZ UYUMLULUĞU
    ============================ */

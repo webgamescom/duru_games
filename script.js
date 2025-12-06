@@ -139,3 +139,180 @@ if (document.getElementById('cringe-oyunu')) {
     // Sayfa yüklendiğinde oyunu başlat
     oyunuBaslat();
 }
+
+
+/* ============================
+   FLAPPY BIRD OYUNU MANTIĞI
+   ============================ */
+
+// Sadece 'flappy-board' ID'si olan sayfada çalışması için kontrol
+if (document.getElementById('flappy-board')) {
+    
+    // Oyun Alanı Ayarları
+    const board = document.getElementById('flappy-board');
+    const boardWidth = 360; // Genişlik
+    const boardHeight = 640; // Yükseklik
+    const context = board.getContext("2d"); // Oyunun çizileceği alan
+
+    board.height = boardHeight;
+    board.width = boardWidth;
+
+    // Karakter Ayarları
+    const characterWidth = 46; 
+    const characterHeight = 34; 
+    let characterX = boardWidth / 8;
+    let characterY = boardHeight / 2;
+    let characterImg;
+
+    const character = {
+        x: characterX,
+        y: characterY,
+        width: characterWidth,
+        height: characterHeight
+    }
+
+    // Duvar (Boru) Ayarları
+    let pipeArray = [];
+    const pipeWidth = 64; 
+    const pipeHeight = 512;
+    let pipeX = boardWidth;
+    let pipeY = 0;
+
+    let topPipeImg;
+    let bottomPipeImg;
+
+    // Fizik Ayarları
+    let velocityX = -2; // Duvarların sola hareket hızı
+    let velocityY = 0; // Karakterin zıplama hızı
+    let gravity = 0.1; // Yerçekimi
+
+    let gameOver = false;
+    let score = 0;
+
+    // Oyun kurulumu
+    window.onload = function() {
+        // Resimleri yükle
+        characterImg = new Image();
+        characterImg.src = "images/ucan-karakter.png";
+        characterImg.onload = function() {
+            context.drawImage(characterImg, character.x, character.y, character.width, character.height);
+        }
+
+        topPipeImg = new Image();
+        topPipeImg.src = "images/duvar1.png";
+
+        bottomPipeImg = new Image();
+        bottomPipeImg.src = "images/duvar2.png";
+
+        requestAnimationFrame(update); // Oyun döngüsünü başlat
+        setInterval(placePipes, 1500); // 1.5 saniyede bir yeni duvar ekle
+        document.addEventListener("keydown", moveCharacter); // Klavyeden tuşa basınca
+        board.addEventListener("mousedown", moveCharacter); // Mouse ile tıklayınca
+    }
+
+    // Oyun döngüsü
+    function update() {
+        requestAnimationFrame(update);
+        if (gameOver) {
+            return;
+        }
+        context.clearRect(0, 0, board.width, board.height);
+
+        // Karakteri güncelle
+        velocityY += gravity;
+        character.y = Math.max(character.y + velocityY, 0); // Karakter üst sınırdan çıkamaz
+        context.drawImage(characterImg, character.x, character.y, character.width, character.height);
+
+        // Karakter yere çarparsa oyunu bitir
+        if (character.y > board.height) {
+            gameOver = true;
+        }
+
+        // Duvarları güncelle
+        for (let i = 0; i < pipeArray.length; i++) {
+            let pipe = pipeArray[i];
+            pipe.x += velocityX;
+            context.drawImage(pipe.img, pipe.x, pipe.y, pipe.width, pipe.height);
+
+            // Skoru artır
+            if (!pipe.passed && character.x > pipe.x + pipe.width) {
+                score += 0.5; // İki duvar olduğu için 0.5
+                pipe.passed = true;
+            }
+
+            // Çarpışma kontrolü
+            if (detectCollision(character, pipe)) {
+                gameOver = true;
+            }
+        }
+
+        // Geçmiş duvarları temizle
+        while (pipeArray.length > 0 && pipeArray[0].x < -pipeWidth) {
+            pipeArray.shift();
+        }
+
+        // Skoru ekrana yazdır
+        context.fillStyle = "white";
+        context.font = "45px sans-serif";
+        context.fillText(score, 5, 45);
+
+        if (gameOver) {
+            context.fillText("OYUN BİTTİ", 55, 300);
+            context.font = "20px sans-serif";
+            context.fillText("Tekrar Oynamak İçin Tıkla", 65, 340);
+        }
+    }
+    
+    // Yeni duvarları yerleştir
+    function placePipes() {
+        if (gameOver) {
+            return;
+        }
+
+        let randomPipeY = pipeY - pipeHeight / 4 - Math.random() * (pipeHeight / 2);
+        let openingSpace = board.height / 4;
+
+        let topPipe = {
+            img: topPipeImg,
+            x: pipeX,
+            y: randomPipeY,
+            width: pipeWidth,
+            height: pipeHeight,
+            passed: false
+        }
+        pipeArray.push(topPipe);
+
+        let bottomPipe = {
+            img: bottomPipeImg,
+            x: pipeX,
+            y: randomPipeY + pipeHeight + openingSpace,
+            width: pipeWidth,
+            height: pipeHeight,
+            passed: false
+        }
+        pipeArray.push(bottomPipe);
+    }
+    
+    // Karakteri zıplat
+    function moveCharacter(e) {
+        if (e.code == "Space" || e.type === "mousedown") {
+            velocityY = -4; // Zıplama gücü
+
+            // Oyun bittiyse yeniden başlat
+            if (gameOver) {
+                character.y = characterY;
+                pipeArray = [];
+                score = 0;
+                gameOver = false;
+            }
+        }
+    }
+
+    // Çarpışma kontrolü
+    function detectCollision(a, b) {
+        return a.x < b.x + b.width &&
+               a.x + a.width > b.x &&
+               a.y < b.y + b.height &&
+               a.y + a.height > b.y;
+    }
+}
